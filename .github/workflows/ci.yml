@@ -41,7 +41,29 @@ jobs:
       
       - name: Create fake Firebase file
         run: |
-          echo '{"type": "service_account"}' > /tmp/fake-service-account.json
+          openssl genrsa -out /tmp/fake-firebase-key.pem 2048
+          python - <<'PY'
+          import json
+
+          with open('/tmp/fake-firebase-key.pem', 'r', encoding='utf-8') as f:
+              private_key = f.read()
+
+          payload = {
+              "type": "service_account",
+              "project_id": "test",
+              "private_key_id": "ci-private-key-id",
+              "private_key": private_key,
+              "client_email": "ci-firebase@test.iam.gserviceaccount.com",
+              "client_id": "000000000000000000000",
+              "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+              "token_uri": "https://oauth2.googleapis.com/token",
+              "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+              "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/ci-firebase%40test.iam.gserviceaccount.com",
+          }
+
+          with open('/tmp/fake-service-account.json', 'w', encoding='utf-8') as f:
+              json.dump(payload, f)
+          PY
 
       - name: Django system checks
         run: python manage.py check
