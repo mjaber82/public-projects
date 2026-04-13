@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: app.settings.dev
+      SECRET_KEY: ci-secret
+      ALLOWED_HOSTS: localhost
+      REDIS_URL: redis://localhost:6379/0
+      CELERY_BROKER_URL: redis://localhost:6379/1
+      CELERY_RESULT_BACKEND: redis://localhost:6379/2
+      STRIPE_SECRET_KEY: test
+      STRIPE_WEBHOOK_SECRET: test
+      FIREBASE_PROJECT_ID: test
+      FIREBASE_SERVICE_ACCOUNT_JSON: /tmp/fake-service-account.json
+      DEFAULT_FROM_EMAIL: no-reply@example.com
+      EMAIL_BACKEND: django.core.mail.backends.console.EmailBackend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Django system checks
+        run: python manage.py check
+
+      - name: Ensure migrations are current
+        run: python manage.py makemigrations --check
+
+      - name: Run tests
+        run: pytest app/ -v --cov=app/ --cov-report=term
+
+      - name: Build Docker image
+        run: docker build . --tag digital-wallet-ci

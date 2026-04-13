@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Change Confirmation</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #ffffff;
+        padding: 40px 20px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+      }
+      .content {
+        padding: 30px;
+      }
+      .content h2 {
+        color: #667eea;
+        font-size: 20px;
+        margin-top: 0;
+      }
+      .content p {
+        margin: 15px 0;
+        color: #666;
+      }
+      .confirmation-box {
+        background-color: #e8f5e9;
+        border-left: 4px solid #4caf50;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+      .confirmation-box h3 {
+        color: #2e7d32;
+        margin-top: 0;
+        font-size: 16px;
+      }
+      .change-details {
+        background-color: #f9f9f9;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 4px;
+        border: 1px solid #eee;
+      }
+      .change-details p {
+        margin: 12px 0;
+        font-size: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .change-details strong {
+        color: #667eea;
+      }
+      .security-notice {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+      .security-notice h3 {
+        color: #856404;
+        margin-top: 0;
+        font-size: 16px;
+      }
+      .security-notice ul {
+        margin: 10px 0;
+        padding-left: 20px;
+        color: #856404;
+      }
+      .security-notice li {
+        margin: 8px 0;
+      }
+      .footer {
+        background-color: #f5f5f5;
+        padding: 20px;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+        border-top: 1px solid #eee;
+      }
+      .footer a {
+        color: #667eea;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Email Change Confirmed ✓</h1>
+      </div>
+      <div class="content">
+        <h2>Your Email Has Been Updated</h2>
+        <p>Hi {{ first_name }},</p>
+        <p>
+          This email confirms that the primary email address for your Digital
+          Wallet account has been successfully changed.
+        </p>
+
+        <div class="confirmation-box">
+          <h3>✓ Change Confirmed</h3>
+          <p>
+            Your email change request has been processed and verified. Your new
+            email address is now active on your account.
+          </p>
+        </div>
+
+        <div class="change-details">
+          <p>
+            <span><strong>New Email Address:</strong></span>
+            <span style="font-weight: 600; color: #667eea"
+              >{{ new_email }}</span
+            >
+          </p>
+          <p>
+            <span><strong>Change Date & Time:</strong></span>
+            <span style="font-weight: 600">{{ changed_at }}</span>
+          </p>
+        </div>
+
+        <p>This new email address will be used for:</p>
+        <ul>
+          <li>Account notifications and alerts</li>
+          <li>Password recovery and account verification</li>
+          <li>Important account updates</li>
+          <li>Transaction confirmations</li>
+        </ul>
+
+        <div class="security-notice">
+          <h3>⚠️ Security Notice</h3>
+          <ul>
+            <li>
+              If you did <strong>not</strong> make this change, please contact
+              support immediately
+            </li>
+            <li>
+              Your previous sessions remain active but you may need to
+              re-authenticate
+            </li>
+            <li>
+              Check your account activity regularly for any suspicious changes
+            </li>
+            <li>
+              We recommend enabling additional security features like 2FA if
+              available
+            </li>
+          </ul>
+        </div>
+
+        <p>
+          If you have any questions about this change or notice any unauthorized
+          activity, please contact our support team immediately.
+        </p>
+        <p>Best regards,<br /><strong>The Digital Wallet Team</strong></p>
+      </div>
+      <div class="footer">
+        <p>&copy; 2026 Digital Wallet. All rights reserved.</p>
+        <p>
+          You received this email because the primary email on your Digital
+          Wallet account was changed.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

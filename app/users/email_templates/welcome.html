@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to Digital Wallet</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #ffffff;
+        padding: 40px 20px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+      }
+      .content {
+        padding: 30px;
+      }
+      .content h2 {
+        color: #667eea;
+        font-size: 20px;
+        margin-top: 0;
+      }
+      .content p {
+        margin: 15px 0;
+        color: #666;
+      }
+      .features {
+        background-color: #f9f9f9;
+        border-left: 4px solid #667eea;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+      .features h3 {
+        color: #667eea;
+        margin-top: 0;
+        font-size: 16px;
+      }
+      .features ul {
+        margin: 10px 0;
+        padding-left: 20px;
+        color: #666;
+      }
+      .features li {
+        margin: 8px 0;
+      }
+      .cta-button {
+        display: inline-block;
+        background-color: #667eea;
+        color: #ffffff;
+        padding: 12px 30px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        margin: 20px 0;
+      }
+      .cta-button:hover {
+        background-color: #764ba2;
+      }
+      .footer {
+        background-color: #f5f5f5;
+        padding: 20px;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+        border-top: 1px solid #eee;
+      }
+      .footer a {
+        color: #667eea;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Welcome to Digital Wallet! 🎉</h1>
+      </div>
+      <div class="content">
+        <h2>Account Activation Successful</h2>
+        <p>Hi {{ first_name }},</p>
+        <p>
+          Your Digital Wallet account has been successfully created and is now
+          ready to use. We're excited to have you on board!
+        </p>
+
+        <div class="features">
+          <h3>What You Can Do Now:</h3>
+          <ul>
+            <li>
+              <strong>Create Wallets:</strong> Set up and manage multiple
+              digital wallets
+            </li>
+            <li>
+              <strong>Send Transfers:</strong> Transfer money securely to other
+              users
+            </li>
+            <li>
+              <strong>Top Up:</strong> Add funds to your wallets using various
+              payment methods
+            </li>
+            <li>
+              <strong>Track Transactions:</strong> View detailed transaction
+              history and balance
+            </li>
+            <li>
+              <strong>Secure Your Account:</strong> Manage security settings and
+              preferences
+            </li>
+          </ul>
+        </div>
+
+        <p>Your account details:</p>
+        <ul>
+          <li><strong>Phone Number:</strong> {{ msisdn }}</li>
+          <li><strong>Email:</strong> {{ email }}</li>
+        </ul>
+
+        <p>
+          To get started, you can log in with your phone number and 4-digit
+          passcode.
+        </p>
+
+        <p style="text-align: center">
+          <a href="{{ app_url }}" class="cta-button">Open Digital Wallet</a>
+        </p>
+
+        <p
+          style="
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+          "
+        >
+          <strong>Security Tips:</strong>
+        </p>
+        <ul>
+          <li>Never share your passcode with anyone</li>
+          <li>Keep your email and phone number updated</li>
+          <li>Review your login sessions regularly</li>
+          <li>Contact us immediately if you notice any suspicious activity</li>
+        </ul>
+
+        <p>
+          If you have any questions or need assistance, please don't hesitate to
+          reach out to our support team.
+        </p>
+        <p>Welcome aboard!<br /><strong>The Digital Wallet Team</strong></p>
+      </div>
+      <div class="footer">
+        <p>&copy; 2026 Digital Wallet. All rights reserved.</p>
+        <p>
+          You received this email because you created an account at Digital
+          Wallet.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,62 @@
+version: '3.9'
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+
+  firebase-auth-emulator:
+    image: node:20-alpine
+    working_dir: /workspace
+    command: >
+      sh -c 'npm install -g firebase-tools &&
+             firebase emulators:start --only auth --project ${FIREBASE_PROJECT_ID:-digital-wallet-49639} --config /workspace/firebase.json'
+    volumes:
+      - .:/workspace
+    ports:
+      - '9099:9099'
+
+  web:
+    build: .
+    command: >
+      sh -c 'python manage.py migrate --noinput &&
+             python manage.py seed_roles &&
+             python manage.py runserver 0.0.0.0:8000'
+    volumes:
+      - .:/app
+      - ./secrets:/app/secrets
+    ports:
+      - '8000:8000'
+    env_file: .env
+    environment:
+      FIREBASE_AUTH_EMULATOR_HOST: firebase-auth-emulator:9099
+    depends_on:
+      - redis
+      - firebase-auth-emulator
+
+  celery:
+    build: .
+    command: celery -A app.celery worker -l info -Q default,notifications
+    volumes:
+      - .:/app
+      - ./secrets:/app/secrets
+    env_file: .env
+    environment:
+      FIREBASE_AUTH_EMULATOR_HOST: firebase-auth-emulator:9099
+    depends_on:
+      - redis
+      - firebase-auth-emulator
+
+  celery-beat:
+    build: .
+    command: celery -A app.celery beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+      - ./secrets:/app/secrets
+    env_file: .env
+    environment:
+      FIREBASE_AUTH_EMULATOR_HOST: firebase-auth-emulator:9099
+    depends_on:
+      - redis
+      - firebase-auth-emulator

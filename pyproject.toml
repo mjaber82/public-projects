@@ -1,0 +1,31 @@
+[tool.ruff]
+line-length = 119
+target-version = "py313"
+exclude = ["migrations/", "venv/", ".git/"]
+
+[tool.ruff.lint]
+# Ignore F403/F405 (undefined names from star imports) in settings files (Django pattern)
+# Ignore E402 (module import not at top) in settings files (allowed in Django)
+ignore = ["F403", "F405", "E402"]
+
+[tool.black]
+line-length = 119
+target-version = ['py313']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | migrations
+)/
+'''

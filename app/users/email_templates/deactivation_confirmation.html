@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Deactivation Confirmation</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background-color: #ff6b6b;
+        color: #ffffff;
+        padding: 40px 20px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+      }
+      .content {
+        padding: 30px;
+      }
+      .content h2 {
+        color: #ff6b6b;
+        font-size: 20px;
+        margin-top: 0;
+      }
+      .content p {
+        margin: 15px 0;
+        color: #666;
+      }
+      .warning-box {
+        background-color: #fff3cd;
+        border-left: 4px solid #ff6b6b;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+      .warning-box h3 {
+        color: #ff6b6b;
+        margin-top: 0;
+        font-size: 16px;
+      }
+      .details {
+        background-color: #f9f9f9;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 4px;
+        border: 1px solid #eee;
+      }
+      .details p {
+        margin: 10px 0;
+        font-size: 14px;
+      }
+      .reactivate-button {
+        display: inline-block;
+        background-color: #667eea;
+        color: #ffffff;
+        padding: 12px 30px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        margin: 20px 0;
+      }
+      .reactivate-button:hover {
+        background-color: #764ba2;
+      }
+      .footer {
+        background-color: #f5f5f5;
+        padding: 20px;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+        border-top: 1px solid #eee;
+      }
+      .footer a {
+        color: #667eea;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Account Deactivated ⚠️</h1>
+      </div>
+      <div class="content">
+        <h2>Your Digital Wallet Account Has Been Deactivated</h2>
+        <p>Hi {{ first_name }},</p>
+        <p>
+          This email is to confirm that your Digital Wallet account has been
+          successfully deactivated on <strong>{{ deactivated_at }}</strong>.
+        </p>
+
+        <div class="details">
+          <h3 style="margin-top: 0; color: #666">What This Means:</h3>
+          <p><strong>Account Status:</strong> Inactive</p>
+          <p>
+            <strong>Wallet Access:</strong> You can no longer access your
+            wallets or perform any transactions
+          </p>
+          <p>
+            <strong>Data:</strong> Your account data is securely retained but
+            not accessible
+          </p>
+        </div>
+
+        <div class="warning-box">
+          <h3>Important Information</h3>
+          <ul style="margin: 10px 0; padding-left: 20px; color: #866">
+            <li>You will not be able to log in or access your account</li>
+            <li>Any pending transactions have been cancelled</li>
+            <li>Your account can be reactivated at any time</li>
+            <li>If this wasn't you, please contact support immediately</li>
+          </ul>
+        </div>
+
+        <p style="text-align: center">
+          <a href="{{ app_url }}/reactivate" class="reactivate-button"
+            >Reactivate Account</a
+          >
+        </p>
+
+        <p
+          style="
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            font-size: 14px;
+            color: #999;
+          "
+        >
+          If you did not perform this action or if you need further assistance,
+          please contact our support team immediately at
+          <strong>support@digitalwallet.local</strong>.
+        </p>
+
+        <p>
+          Thank you for using Digital Wallet. We hope to see you again!<br /><strong
+            >The Digital Wallet Team</strong
+          >
+        </p>
+      </div>
+      <div class="footer">
+        <p>&copy; 2026 Digital Wallet. All rights reserved.</p>
+        <p>
+          You received this email because your Digital Wallet account was
+          deactivated.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

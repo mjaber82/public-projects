@@ -1,0 +1,38 @@
+### GENERAL CONFIGURATION ###
+[general]
+ignore=body-is-missing,contrib-title-conventional-commits-signed-off-by
+verbosity=2
+regex-style-search=true
+contrib=contrib-title-conventional-commits
+
+
+
+### RULE CONFIGURATION ###
+
+[title-max-length]
+line-length=128
+
+[title-min-length]
+min-length=10
+
+[contrib-title-conventional-commits]
+# List allowed types for Conventional Commits
+types=feat,fix,docs,style,refactor,perf,test,chore,ci,build,revert
+
+
+### BODY CONFIGURATION ###
+
+[body-max-line-length]
+line-length=100
+
+[body-min-length]
+min-length=5
+
+[body-is-missing]
+# Ignore this rule on merge commits
+ignore-merge-commits=true
+
+[ignore-by-title]
+# Ignore rules for titles that match a release pattern
+regex=^Release(.*)
+ignore=title-must-not-contain-word,body-min-length
