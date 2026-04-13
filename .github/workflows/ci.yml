@@ -38,6 +38,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      
+      - name: Create fake Firebase file
+        run: |
+          echo '{}' > /tmp/fake-service-account.json
 
       - name: Django system checks
         run: python manage.py check
