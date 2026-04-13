@@ -41,7 +41,7 @@ jobs:
       
       - name: Create fake Firebase file
         run: |
-          echo '{}' > /tmp/fake-service-account.json
+          echo '{"type": "service_account"}' > /tmp/fake-service-account.json
 
       - name: Django system checks
         run: python manage.py check
