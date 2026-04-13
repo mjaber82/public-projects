@@ -1,4 +1,4 @@
-﻿amqp==5.3.1
+amqp==5.3.1
 anyio==4.13.0
 argon2-cffi==25.1.0
 argon2-cffi-bindings==25.1.0
@@ -85,6 +85,7 @@ Pygments==2.20.0
 PyJWT==2.12.1
 pyparsing==3.3.2
 pytest==9.0.2
+pytest-cov==7.0.0
 pytest-django==4.12.0
 python-crontab==3.3.0
 python-dateutil==2.9.0.post0
