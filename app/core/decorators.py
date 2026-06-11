@@ -141,7 +141,7 @@ def api_return(func):
             return ajax_response(
                 create_response(
                     status=ResponseStatus.FAIL,
-                    message=str(exc) or ResponseMessage.UNKNOWN_ERROR,
+                    message=ResponseMessage.UNKNOWN_ERROR,
                 )
             )
 

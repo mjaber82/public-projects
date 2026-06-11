@@ -106,6 +106,11 @@ class FakeStripeCheckoutTests(TestCase):
         self.assertEqual(tx.amount, Decimal("25.00"))
         self.assertTrue(tx.stripe_session_id.startswith("fake_cs_"))
 
+    def _unwrap(self, view_func):
+        while hasattr(view_func, "__wrapped__"):
+            view_func = view_func.__wrapped__
+        return view_func
+
     def test_fake_checkout_complete_updates_wallet_and_transaction(self) -> None:
         session_url, _ = create_stripe_session(self.user, str(self.wallet.public_id), Decimal("25.00"))
         request = self.factory.post(
@@ -122,7 +127,7 @@ class FakeStripeCheckoutTests(TestCase):
         )
         session_id = session_url.rstrip("/").split("/")[-1]
 
-        response = views.fake_topup_checkout.__wrapped__(request, session_id=session_id)
+        response = self._unwrap(views.fake_topup_checkout)(request, session_id=session_id)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content)["status"], "SUCCESS")
@@ -588,8 +593,8 @@ class TransactionsViewTests(TestCase):
         session_url, _ = create_stripe_session(self.sender, str(self.sender_wallet.public_id), Decimal("50.00"))
         session_id = session_url.rstrip("/").split("/")[-1]
 
-        request = self.factory.get(f"/api/v1/transactions/topup/fake-checkout/{session_id}/")
-        response = views.fake_topup_checkout(request, session_id=session_id)
+        request = self._get_with_auth(f"/api/v1/transactions/topup/fake-checkout/{session_id}/")
+        response = self._call_view(lambda r: views.fake_topup_checkout(r, session_id=session_id), request)
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
@@ -597,8 +602,8 @@ class TransactionsViewTests(TestCase):
         self.assertIn("session_id", data["payload"])
 
     def test_fake_checkout_get_fails_for_invalid_session(self) -> None:
-        request = self.factory.get("/api/v1/transactions/topup/fake-checkout/invalid-session/")
-        response = views.fake_topup_checkout(request, session_id="invalid-session")
+        request = self._get_with_auth("/api/v1/transactions/topup/fake-checkout/invalid-session/")
+        response = self._call_view(lambda r: views.fake_topup_checkout(r, session_id="invalid-session"), request)
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
@@ -608,12 +613,11 @@ class TransactionsViewTests(TestCase):
         session_url, _ = create_stripe_session(self.sender, str(self.sender_wallet.public_id), Decimal("50.00"))
         session_id = session_url.rstrip("/").split("/")[-1]
 
-        request = self.factory.post(
+        request = self._post_with_auth(
             f"/api/v1/transactions/topup/fake-checkout/{session_id}/",
-            data=json.dumps({"action": "complete"}),
-            content_type="application/json",
+            data={"action": "complete"},
         )
-        response = views.fake_topup_checkout(request, session_id=session_id)
+        response = self._call_view(lambda r: views.fake_topup_checkout(r, session_id=session_id), request)
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)

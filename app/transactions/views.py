@@ -1,5 +1,6 @@
 import json
 
+from django.conf import settings
 from django.db.models import Q
 from app.core.constants import ResponseMessage, ResponseStatus
 from app.core.decorators import api_return, api_auth, params_required
@@ -186,7 +187,11 @@ def create_topup_session(request):
 
 
 @api_return
+@api_auth
 def fake_topup_checkout(request, session_id: str):
+    if not getattr(settings, "FAKE_STRIPE_CHECKOUT", False):
+        return create_response(status=ResponseStatus.FAIL, message="Fake checkout is disabled")
+
     if request.method == "GET":
         payload, error = get_fake_checkout_session(session_id)
         if error:
