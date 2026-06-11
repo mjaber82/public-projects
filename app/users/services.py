@@ -140,6 +140,20 @@ def _generate_numeric_otp(length: int = 6) -> str:
     return "".join(str(random.randint(0, 9)) for _ in range(length))
 
 
+def _verify_cached_email_otp(cache_key: str, expected_email: str, otp_code: str) -> tuple[bool, str | None]:
+    """Verify an email OTP stored in cache. Returns (True, None) on success."""
+    verification_data = cache.get(cache_key) or {}
+    stored_otp = str(verification_data.get("otp") or "")
+    stored_email = str(verification_data.get("email") or "")
+    if not stored_otp:
+        return False, "Email OTP expired. Request a new code"
+    if stored_email != expected_email:
+        return False, "Email verification context mismatch"
+    if stored_otp != str(otp_code).strip():
+        return False, "Invalid OTP"
+    return True, None
+
+
 def _normalize_key_part(value: str | None) -> str:
     return (value or "").strip().lower().replace(" ", "_") or "unknown"
 
@@ -236,6 +250,16 @@ def _issue_auth_tokens(user: User, user_session: UserSession) -> dict[str, str]:
         "session_id": str(user_session.public_id),
         "session_state": user_session.state,
     }
+
+
+def _revoke_all_sessions(user: User) -> None:
+    """Invalidate all active sessions for a user."""
+    UserSession.objects.filter(user=user, is_active=True).update(
+        is_active=False,
+        state="LOCKED",
+        refresh_token_hash=None,
+        last_seen_at=timezone.now(),
+    )
 
 
 def _get_or_create_device_session(user: User, device_id: str, ip: str) -> UserSession:
@@ -407,15 +431,11 @@ def verify_registration_email_otp(registration_token: str, otp_code: str) -> tup
     if not otp_code:
         return False, "Invalid OTP"
 
-    verification_data = cache.get(_registration_email_otp_key(registration_token)) or {}
-    stored_otp = str(verification_data.get("otp") or "")
-    stored_email = str(verification_data.get("email") or "")
-    if not stored_otp:
-        return False, "Email OTP expired. Request a new code"
-    if stored_email != registration.email:
-        return False, "Email verification context mismatch"
-    if stored_otp != str(otp_code).strip():
-        return False, "Invalid OTP"
+    otp_valid, otp_error = _verify_cached_email_otp(
+        _registration_email_otp_key(registration_token), registration.email, otp_code
+    )
+    if not otp_valid:
+        return False, otp_error
 
     cache.delete(_registration_email_otp_key(registration_token))
 
@@ -574,12 +594,7 @@ def deactivate_account(user: User) -> tuple[bool, str | None]:
         user.is_active = False
         user.deactivated_at = timezone.now()
         user.save(update_fields=["is_active", "deactivated_at"])
-        UserSession.objects.filter(user=user, is_active=True).update(
-            is_active=False,
-            state="LOCKED",
-            refresh_token_hash=None,
-            last_seen_at=timezone.now(),
-        )
+        _revoke_all_sessions(user)
 
         # Send deactivation confirmation email
         _send_deactivation_email(user)
@@ -669,12 +684,7 @@ def _apply_email_change(user: User, email: str) -> None:
     with transaction.atomic():
         user.email = email
         user.save(update_fields=["email"])
-        UserSession.objects.filter(user=user, is_active=True).update(
-            is_active=False,
-            state="LOCKED",
-            refresh_token_hash=None,
-            last_seen_at=timezone.now(),
-        )
+        _revoke_all_sessions(user)
 
     # Send email change confirmation to the new email address
     _send_email_change_confirmation(email, user.first_name)
@@ -690,12 +700,7 @@ def change_passcode_with_step_up(user: User, step_up_token: str, new_passcode: s
     with transaction.atomic():
         user.set_password(new_passcode)
         user.save(update_fields=["password"])
-        UserSession.objects.filter(user=user, is_active=True).update(
-            is_active=False,
-            state="LOCKED",
-            refresh_token_hash=None,
-            last_seen_at=timezone.now(),
-        )
+        _revoke_all_sessions(user)
     return True, None
 
 
@@ -762,15 +767,9 @@ def verify_change_email_otp(user: User, step_up_token: str, new_email: str, otp_
     if email == (user.email or "").strip().lower():
         return False, "New email must be different from current email"
 
-    verification_data = cache.get(_change_email_otp_key(user, email)) or {}
-    stored_otp = str(verification_data.get("otp") or "")
-    stored_email = str(verification_data.get("email") or "")
-    if not stored_otp:
-        return False, "Email OTP expired. Request a new code"
-    if stored_email != email:
-        return False, "Email verification context mismatch"
-    if stored_otp != str(otp_code).strip():
-        return False, "Invalid OTP"
+    otp_valid, otp_error = _verify_cached_email_otp(_change_email_otp_key(user, email), email, otp_code)
+    if not otp_valid:
+        return False, otp_error
 
     ok, error = _consume_step_up_token(step_up_token, user, "CHANGE_EMAIL")
     if not ok:
@@ -800,12 +799,7 @@ def change_msisdn_with_step_up(
         user.msisdn = normalized_msisdn
         user.country = country
         user.save(update_fields=["msisdn", "country"])
-        UserSession.objects.filter(user=user, is_active=True).update(
-            is_active=False,
-            state="LOCKED",
-            refresh_token_hash=None,
-            last_seen_at=timezone.now(),
-        )
+        _revoke_all_sessions(user)
     return True, None
 
 
@@ -959,12 +953,7 @@ def forgot_passcode_complete(msisdn: str, step_up_token_2: str, new_passcode: st
     with transaction.atomic():
         user.set_password(new_passcode)
         user.save(update_fields=["password"])
-        UserSession.objects.filter(user=user, is_active=True).update(
-            is_active=False,
-            state="LOCKED",
-            refresh_token_hash=None,
-            last_seen_at=timezone.now(),
-        )
+        _revoke_all_sessions(user)
     return True, None
 
 
@@ -1049,11 +1038,6 @@ def no_sim_recovery_complete(
         user.msisdn = normalized_new_msisdn
         user.country = country
         user.save(update_fields=["msisdn", "country"])
-        UserSession.objects.filter(user=user, is_active=True).update(
-            is_active=False,
-            state="LOCKED",
-            refresh_token_hash=None,
-            last_seen_at=timezone.now(),
-        )
+        _revoke_all_sessions(user)
 
     return True, None

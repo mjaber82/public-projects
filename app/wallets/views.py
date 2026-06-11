@@ -1,8 +1,6 @@
-import json
-
 from app.core.constants import ResponseMessage, ResponseStatus
 from app.core.decorators import api_return, api_auth
-from app.core.tools import create_response
+from app.core.tools import create_response, get_request_data
 from .serializers import (
     CreateWalletSerializer,
     UpdateWalletSerializer,
@@ -16,22 +14,6 @@ from .services import (
     get_wallet_list,
     update_wallet_name,
 )
-
-
-def _get_request_data(request):
-    if request.method == "GET":
-        return request.GET.dict()
-
-    if request.POST:
-        return request.POST.dict()
-
-    if request.body:
-        try:
-            return json.loads(request.body.decode("utf-8"))
-        except json.JSONDecodeError:
-            return {}
-
-    return {}
 
 
 @api_return
@@ -48,7 +30,7 @@ def wallet_list(request):
 @api_return
 @api_auth
 def wallet_detail(request):
-    data = _get_request_data(request)
+    data = get_request_data(request)
     serializer = WalletActionSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
@@ -66,7 +48,7 @@ def wallet_detail(request):
 @api_return
 @api_auth
 def create_wallet(request):
-    data = _get_request_data(request)
+    data = get_request_data(request)
     serializer = CreateWalletSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
@@ -84,7 +66,7 @@ def create_wallet(request):
 @api_return
 @api_auth
 def update_wallet(request):
-    data = _get_request_data(request)
+    data = get_request_data(request)
     serializer = UpdateWalletSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
@@ -106,7 +88,7 @@ def update_wallet(request):
 @api_return
 @api_auth
 def deactivate_wallet_view(request):
-    data = _get_request_data(request)
+    data = get_request_data(request)
     serializer = WalletActionSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 

@@ -1,8 +1,6 @@
-import json
-
 from app.core.constants import ResponseMessage, ResponseStatus
 from app.core.decorators import api_auth, api_return
-from app.core.tools import create_response, get_ip
+from app.core.tools import create_response, get_ip, get_request_data
 
 from .serializers import (
     ChangeEmailSerializer,
@@ -54,25 +52,9 @@ from .services import (
 )
 
 
-def _get_request_data(request):
-    if request.method == "GET":
-        return request.GET.dict()
-
-    if request.POST:
-        return request.POST.dict()
-
-    if request.body:
-        try:
-            return json.loads(request.body.decode("utf-8"))
-        except json.JSONDecodeError:
-            return {}
-
-    return {}
-
-
 @api_return
 def verify_account_view(request):
-    serializer = VerifyAccountSerializer(data=_get_request_data(request))
+    serializer = VerifyAccountSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     payload, error = verify_account(serializer.validated_data["msisdn"])
@@ -83,7 +65,7 @@ def verify_account_view(request):
 
 @api_return
 def request_otp_view(request):
-    serializer = OtpRequestSerializer(data=_get_request_data(request))
+    serializer = OtpRequestSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     payload, error = request_phone_otp(
@@ -98,7 +80,7 @@ def request_otp_view(request):
 
 @api_return
 def verify_otp_view(request):
-    serializer = OtpVerifySerializer(data=_get_request_data(request))
+    serializer = OtpVerifySerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     payload, error = verify_phone_otp(
@@ -113,7 +95,7 @@ def verify_otp_view(request):
 
 @api_return
 def registration_email_request_view(request):
-    serializer = RegistrationEmailRequestSerializer(data=_get_request_data(request))
+    serializer = RegistrationEmailRequestSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     success, error = send_registration_email_otp(
@@ -127,7 +109,7 @@ def registration_email_request_view(request):
 
 @api_return
 def registration_email_verify_view(request):
-    serializer = RegistrationEmailVerifySerializer(data=_get_request_data(request))
+    serializer = RegistrationEmailVerifySerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     success, error = verify_registration_email_otp(
@@ -141,7 +123,7 @@ def registration_email_verify_view(request):
 
 @api_return
 def complete_registration_view(request):
-    serializer = CompleteRegistrationSerializer(data=_get_request_data(request))
+    serializer = CompleteRegistrationSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     payload, error = complete_registration(
@@ -158,7 +140,7 @@ def complete_registration_view(request):
 
 @api_return
 def login_passcode_view(request):
-    serializer = LoginPasscodeSerializer(data=_get_request_data(request))
+    serializer = LoginPasscodeSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     payload, error = login_with_passcode(
@@ -175,7 +157,7 @@ def login_passcode_view(request):
 
 @api_return
 def refresh_token_view(request):
-    serializer = RefreshTokenSerializer(data=_get_request_data(request))
+    serializer = RefreshTokenSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     payload, error = refresh_access_token(serializer.validated_data["refresh_token"])
@@ -187,7 +169,7 @@ def refresh_token_view(request):
 @api_return
 @api_auth
 def unlock_session_view(request):
-    serializer = UnlockSessionSerializer(data=_get_request_data(request))
+    serializer = UnlockSessionSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     payload, error = unlock_session(
@@ -222,7 +204,7 @@ def get_info(request):
 @api_return
 @api_auth
 def update_profile_view(request):
-    serializer = UpdateProfileSerializer(data=_get_request_data(request))
+    serializer = UpdateProfileSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     user, error = update_profile(request.user, serializer.validated_data)
@@ -248,7 +230,7 @@ def deactivate_account_view(request):
 @api_return
 @api_auth
 def request_step_up_token_view(request):
-    serializer = StepUpRequestSerializer(data=_get_request_data(request))
+    serializer = StepUpRequestSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     payload, error = issue_step_up_token(
@@ -264,7 +246,7 @@ def request_step_up_token_view(request):
 @api_return
 @api_auth
 def change_passcode_view(request):
-    serializer = ChangePasscodeSerializer(data=_get_request_data(request))
+    serializer = ChangePasscodeSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     success, error = change_passcode_with_step_up(
@@ -280,7 +262,7 @@ def change_passcode_view(request):
 @api_return
 @api_auth
 def change_phone_view(request):
-    serializer = ChangePhoneSerializer(data=_get_request_data(request))
+    serializer = ChangePhoneSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     success, error = change_msisdn_with_step_up(
@@ -297,7 +279,7 @@ def change_phone_view(request):
 @api_return
 @api_auth
 def change_email_view(request):
-    serializer = ChangeEmailSerializer(data=_get_request_data(request))
+    serializer = ChangeEmailSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     verification_code = (serializer.validated_data.get("verification_code") or "").strip()
@@ -324,7 +306,7 @@ def change_email_view(request):
 
 @api_return
 def forgot_passcode_start_view(request):
-    serializer = ForgotPasscodeStartSerializer(data=_get_request_data(request))
+    serializer = ForgotPasscodeStartSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     payload, error = forgot_passcode_start(
@@ -338,7 +320,7 @@ def forgot_passcode_start_view(request):
 
 @api_return
 def forgot_passcode_email_verify_view(request):
-    serializer = ForgotPasscodeEmailVerifySerializer(data=_get_request_data(request))
+    serializer = ForgotPasscodeEmailVerifySerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     payload, error = forgot_passcode_verify_email(
@@ -354,7 +336,7 @@ def forgot_passcode_email_verify_view(request):
 
 @api_return
 def forgot_passcode_complete_view(request):
-    serializer = ForgotPasscodeCompleteSerializer(data=_get_request_data(request))
+    serializer = ForgotPasscodeCompleteSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     success, error = forgot_passcode_complete(
@@ -369,7 +351,7 @@ def forgot_passcode_complete_view(request):
 
 @api_return
 def no_sim_recovery_start_view(request):
-    serializer = NoSimRecoveryStartSerializer(data=_get_request_data(request))
+    serializer = NoSimRecoveryStartSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     payload, error = no_sim_recovery_start(
@@ -383,7 +365,7 @@ def no_sim_recovery_start_view(request):
 
 @api_return
 def no_sim_recovery_email_verify_view(request):
-    serializer = NoSimRecoveryEmailVerifySerializer(data=_get_request_data(request))
+    serializer = NoSimRecoveryEmailVerifySerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     payload, error = no_sim_recovery_verify_email(
@@ -398,7 +380,7 @@ def no_sim_recovery_email_verify_view(request):
 
 @api_return
 def no_sim_recovery_complete_view(request):
-    serializer = NoSimRecoveryCompleteSerializer(data=_get_request_data(request))
+    serializer = NoSimRecoveryCompleteSerializer(data=get_request_data(request))
     serializer.is_valid(raise_exception=True)
 
     success, error = no_sim_recovery_complete(

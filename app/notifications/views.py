@@ -1,8 +1,6 @@
-import json
-
 from app.core.constants import ResponseMessage, ResponseStatus
 from app.core.decorators import api_return, api_auth
-from app.core.tools import create_response
+from app.core.tools import create_response, get_request_data
 from .serializers import NotificationActionSerializer, NotificationSerializer
 from .services import (
     clear_notification,
@@ -10,22 +8,6 @@ from .services import (
     get_notifications,
     mark_read,
 )
-
-
-def _get_request_data(request):
-    if request.method == "GET":
-        return request.GET.dict()
-
-    if request.POST:
-        return request.POST.dict()
-
-    if request.body:
-        try:
-            return json.loads(request.body.decode("utf-8"))
-        except json.JSONDecodeError:
-            return {}
-
-    return {}
 
 
 @api_return
@@ -42,7 +24,7 @@ def notification_list(request):
 @api_return
 @api_auth
 def mark_notification_read(request):
-    data = _get_request_data(request)
+    data = get_request_data(request)
     serializer = NotificationActionSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
@@ -67,7 +49,7 @@ def mark_all_read(request):
 @api_return
 @api_auth
 def clear_notification_view(request):
-    data = _get_request_data(request)
+    data = get_request_data(request)
     serializer = NotificationActionSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 

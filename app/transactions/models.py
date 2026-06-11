@@ -10,17 +10,9 @@ from app.core.models import BaseModel
 
 
 def generate_unique_tx_id():
-    from app.core.tools import generate_account_id
+    from app.core.tools import generate_unique_id
 
-    max_attempts = 10
-
-    for _ in range(max_attempts):
-        tx_id = generate_account_id()
-
-        if not Transaction.objects.filter(transaction_id=tx_id).exists():
-            return tx_id
-
-    raise Exception("Failed to generate unique transaction_id")
+    return generate_unique_id(Transaction, "transaction_id")
 
 
 class Transaction(BaseModel):
