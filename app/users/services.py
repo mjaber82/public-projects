@@ -392,6 +392,7 @@ def send_registration_email_otp(registration_token: str, email: str) -> tuple[bo
     try:
         send_mail(subject, body, from_email, [normalized_email], fail_silently=False)
     except Exception:
+        logger.exception("Failed to send registration email OTP to %s", normalized_email)
         cache.delete(_registration_email_otp_key(registration_token))
         return False, "Unable to send verification email"
 
@@ -746,6 +747,7 @@ def send_change_email_otp(user: User, step_up_token: str, new_email: str) -> tup
     try:
         send_mail(subject, body, from_email, [email], fail_silently=False)
     except Exception:
+        logger.exception("Failed to send change-email OTP to %s", email)
         cache.delete(_change_email_otp_key(user, email))
         return False, "Unable to send verification email"
 
@@ -826,7 +828,7 @@ def _send_welcome_email(user: User, msisdn: str) -> None:
             message=plain_text,
             from_email=from_email,
             recipient_list=[user.email],
-            fail_silently=True,
+            fail_silently=False,
             html_message=html_content,
         )
     except Exception:
@@ -852,7 +854,7 @@ def _send_deactivation_email(user: User) -> None:
             message=plain_text,
             from_email=from_email,
             recipient_list=[user.email],
-            fail_silently=True,
+            fail_silently=False,
             html_message=html_content,
         )
     except Exception:
@@ -880,7 +882,7 @@ def _send_email_change_confirmation(new_email: str, first_name: str) -> None:
             message=plain_text,
             from_email=from_email,
             recipient_list=[new_email],
-            fail_silently=True,
+            fail_silently=False,
             html_message=html_content,
         )
     except Exception:

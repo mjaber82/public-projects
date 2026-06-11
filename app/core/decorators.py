@@ -1,6 +1,9 @@
+import logging
 from functools import wraps
 
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
@@ -132,11 +135,12 @@ def api_return(func):
                 message = message[0]
             return ajax_response(create_response(status=ResponseStatus.FAIL, message=str(message)))
         except Exception as exc:
+            logger.exception("Unhandled exception in %s", func.__name__)
             try:
                 import sentry_sdk
 
                 sentry_sdk.capture_exception(exc)
-            except Exception:
+            except ImportError:
                 pass
             return ajax_response(
                 create_response(
