@@ -16,7 +16,7 @@ def _send_email_to_user(user, subject: str, message: str) -> None:
 
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@digitalwallet.local")
     try:
-        send_mail(subject, message, from_email, [user.email], fail_silently=True)
+        send_mail(subject, message, from_email, [user.email], fail_silently=False)
     except Exception:
         logger.exception("Failed to send notification email to user %s", user)
 

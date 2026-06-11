@@ -19,7 +19,7 @@ def _send_transaction_email_to_user(user, subject: str, message: str) -> None:
 
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@digitalwallet.local")
     try:
-        send_mail(subject, message, from_email, [user.email], fail_silently=True)
+        send_mail(subject, message, from_email, [user.email], fail_silently=False)
     except Exception:
         logger.exception("Failed to send notification email to user %s", user)
 
@@ -138,24 +138,44 @@ def notify_topup_completed(transaction_public_id: str) -> bool:
 
 @shared_task(queue="default")
 def expire_pending_tx() -> int:
+    from django.db import transaction as db_transaction
+    from app.wallets.models import Wallet
+
     expiration_days = getattr(settings, "TRANSACTION_TIMEOUT_DAYS", 30)
     cutoff = timezone.now() - timedelta(days=expiration_days)
     expired_transactions = Transaction.objects.filter(status=TransactionStatus.PENDING, created_dt__lt=cutoff)
 
     count = 0
-    for tx in expired_transactions.select_related("from_wallet__user_account__user"):
+    for tx in expired_transactions.select_related("from_wallet__user_account__user", "to_wallet__user_account"):
         sender_user = tx.from_wallet.user_account.user if tx.from_wallet else None
         if not sender_user:
+            logger.warning("expire_pending_tx: skipping transaction %s with no sender wallet", tx.public_id)
             continue
-        tx.status = TransactionStatus.EXPIRED
-        tx.save(update_fields=["status"])
-        create_notification(
-            sender_user,
-            "Pending transfer expired",
-            f"Your pending transfer of {tx.amount} {tx.currency} has expired after {expiration_days} days.",
-            "TRANSFER_EXPIRED",
-            related_tx=tx,
-        )
-        count += 1
+
+        try:
+            with db_transaction.atomic():
+                locked_tx = Transaction.objects.select_for_update().get(pk=tx.pk, status=TransactionStatus.PENDING)
+                locked_tx.status = TransactionStatus.EXPIRED
+                locked_tx.rejected_dt = timezone.now()
+                locked_tx.save(update_fields=["status", "rejected_dt"])
+                locked_tx.ledgers.update(status="VOIDED")
+
+                sender_wallet = Wallet.objects.select_for_update().get(pk=tx.from_wallet.pk)
+                sender_wallet.balance += tx.amount
+                sender_wallet.in_transfer -= tx.amount
+                sender_wallet.save(update_fields=["balance", "in_transfer"])
+
+            create_notification(
+                sender_user,
+                "Pending transfer expired",
+                f"Your pending transfer of {tx.amount} {tx.currency} has expired after {expiration_days} days.",
+                "TRANSFER_EXPIRED",
+                related_tx=tx,
+            )
+            count += 1
+        except Transaction.DoesNotExist:
+            logger.info("expire_pending_tx: transaction %s already processed", tx.public_id)
+        except Exception:
+            logger.exception("expire_pending_tx: failed to expire transaction %s", tx.public_id)
 
     return count

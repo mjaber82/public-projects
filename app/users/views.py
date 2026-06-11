@@ -1,6 +1,9 @@
 import json
+import logging
 
 from app.core.constants import ResponseMessage, ResponseStatus
+
+logger = logging.getLogger(__name__)
 from app.core.decorators import api_auth, api_return
 from app.core.tools import create_response, get_ip
 
@@ -65,6 +68,7 @@ def _get_request_data(request):
         try:
             return json.loads(request.body.decode("utf-8"))
         except json.JSONDecodeError:
+            logger.warning("Malformed JSON in request body")
             return {}
 
     return {}
