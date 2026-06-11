@@ -2,7 +2,6 @@ import json
 import logging
 import re
 import secrets
-import random
 from datetime import timedelta
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -137,7 +136,8 @@ def _verify_firebase_phone_otp(session_info: str, otp_code: str) -> tuple[dict |
 def _generate_numeric_otp(length: int = 6) -> str:
     if length <= 0:
         length = 6
-    return "".join(str(random.randint(0, 9)) for _ in range(length))
+    _sysrand = secrets.SystemRandom()
+    return "".join(str(_sysrand.randbelow(10)) for _ in range(length))
 
 
 def _normalize_key_part(value: str | None) -> str:

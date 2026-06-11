@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-import random
+import secrets
 import re
 from datetime import date, datetime
 from collections.abc import Mapping, Sequence
@@ -82,7 +82,8 @@ def generate_account_id() -> str:
     Format: XXXXXXXX-XX
     Example: 80789734-04
     """
-    return f"{random.randint(10_000_000, 99_999_999)}-{random.randint(0, 99):02d}"
+    _sysrand = secrets.SystemRandom()
+    return f"{_sysrand.randint(10_000_000, 99_999_999)}-{_sysrand.randint(0, 99):02d}"
 
 
 def password_complexity_validator(password: str, min_length: int = 8) -> bool:
