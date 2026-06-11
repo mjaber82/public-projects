@@ -1,9 +1,7 @@
-import json
-
 from django.db.models import Q
 from app.core.constants import ResponseMessage, ResponseStatus
 from app.core.decorators import api_return, api_auth, params_required
-from app.core.tools import create_response
+from app.core.tools import create_response, get_request_data
 from .serializers import (
     RejectTransactionSerializer,
     TransactionActionSerializer,
@@ -24,22 +22,6 @@ from .services import (
     handle_stripe_webhook,
 )
 from .models import Transaction
-
-
-def _get_request_data(request):
-    if request.method == "GET":
-        return request.GET.dict()
-
-    if request.POST:
-        return request.POST.dict()
-
-    if request.body:
-        try:
-            return json.loads(request.body.decode("utf-8"))
-        except json.JSONDecodeError:
-            return {}
-
-    return {}
 
 
 @api_return
@@ -64,7 +46,7 @@ def transactions_root(request):
         )
 
     if request.method == "POST":
-        data = _get_request_data(request)
+        data = get_request_data(request)
         key = data.get("key")
         if not key:
             return create_response(status=ResponseStatus.FAIL, message="Transaction key is required")
@@ -85,7 +67,7 @@ def transactions_root(request):
 @api_return
 @api_auth
 def transfer(request):
-    data = _get_request_data(request)
+    data = get_request_data(request)
     serializer = TransferCreateSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
@@ -116,7 +98,7 @@ def transfer(request):
 @api_return
 @api_auth
 def accept(request):
-    data = _get_request_data(request)
+    data = get_request_data(request)
     serializer = TransactionActionSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
@@ -130,7 +112,7 @@ def accept(request):
 @api_return
 @api_auth
 def reject(request):
-    data = _get_request_data(request)
+    data = get_request_data(request)
     serializer = RejectTransactionSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
@@ -148,7 +130,7 @@ def reject(request):
 @api_return
 @api_auth
 def cancel(request):
-    data = _get_request_data(request)
+    data = get_request_data(request)
     serializer = RejectTransactionSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
@@ -166,7 +148,7 @@ def cancel(request):
 @api_return
 @api_auth
 def create_topup_session(request):
-    data = _get_request_data(request)
+    data = get_request_data(request)
     serializer = TopUpSessionSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
@@ -197,7 +179,7 @@ def fake_topup_checkout(request, session_id: str):
             payload=payload,
         )
 
-    data = _get_request_data(request)
+    data = get_request_data(request)
     success, error = process_fake_checkout_action(
         session_id,
         data.get("action", "complete"),

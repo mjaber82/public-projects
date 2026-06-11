@@ -7,17 +7,9 @@ from app.core.constants import RegistrationSessionStatus, UserSessionState
 
 
 def generate_unique_account_id():
-    from app.core.tools import generate_account_id
+    from app.core.tools import generate_unique_id
 
-    max_attempts = 10
-
-    for _ in range(max_attempts):
-        account_id = generate_account_id()
-
-        if not UserAccount.objects.filter(account_id=account_id).exists():
-            return account_id
-
-    raise Exception("Failed to generate unique account_id")
+    return generate_unique_id(UserAccount, "account_id")
 
 
 class Country(models.Model):

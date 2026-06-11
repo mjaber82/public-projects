@@ -77,6 +77,15 @@ def get_ip(request: Any) -> str:
     return ip
 
 
+def generate_unique_id(model_class: type, field_name: str, max_attempts: int = 10) -> str:
+    """Generate a unique ID for a model field, retrying up to max_attempts times."""
+    for _ in range(max_attempts):
+        candidate = generate_account_id()
+        if not model_class.objects.filter(**{field_name: candidate}).exists():
+            return candidate
+    raise RuntimeError(f"Failed to generate unique {field_name} after {max_attempts} attempts")
+
+
 def generate_account_id() -> str:
     """
     Format: XXXXXXXX-XX
@@ -175,6 +184,23 @@ def normalize_msisdn(msisdn: str) -> tuple[str | None, Country | None, str | Non
     normalized_msisdn = phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
 
     return normalized_msisdn, country, None
+
+
+def get_request_data(request: Any) -> dict[str, Any]:
+    """Extract request data from GET params, POST form data, or JSON body."""
+    if request.method == "GET":
+        return request.GET.dict()
+
+    if request.POST:
+        return request.POST.dict()
+
+    if request.body:
+        try:
+            return json.loads(request.body.decode("utf-8"))
+        except json.JSONDecodeError:
+            return {}
+
+    return {}
 
 
 def validate_msisdn(msisdn: str) -> tuple[str | None, Country | None, str | None]:

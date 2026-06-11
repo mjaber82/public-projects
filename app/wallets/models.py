@@ -4,17 +4,9 @@ from app.core.models import BaseModel
 
 
 def generate_unique_wallet_id():
-    from app.core.tools import generate_account_id
+    from app.core.tools import generate_unique_id
 
-    max_attempts = 10
-
-    for _ in range(max_attempts):
-        wallet_id = generate_account_id()
-
-        if not Wallet.objects.filter(wallet_id=wallet_id).exists():
-            return wallet_id
-
-    raise Exception("Failed to generate unique wallet_id")
+    return generate_unique_id(Wallet, "wallet_id")
 
 
 class Wallet(BaseModel):
